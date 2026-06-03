@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raio-X do Seu Negócio → Prompt Mestre Lite</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #eef2ff;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --success: #22c55e;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.container {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 640px;
+    min-height: 520px;
+    position: relative;
+    overflow: hidden;
+}
+.progress-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 0 0 4px 4px;
+}
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #a855f7);
+    border-radius: 0 0 4px 4px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+.steps-container {
+    position: relative;
+    padding: 40px 40px 32px;
+}
+.step {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    padding: 40px 40px 32px;
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    display: flex;
+    flex-direction: column;
+}
+.step.active {
+    position: relative;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.step-count {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.step-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 6px;
+}
+.step-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+/* Welcome */
+.welcome-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+.welcome-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+.welcome-sub { color: var(--text-secondary); margin-bottom: 28px; line-height: 1.5; }
+
+/* Form elements */
+.form-group { margin-bottom: 16px; }
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: var(--font);
+    background: var(--card);
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: var(--primary);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.char-count {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+.char-count.warning { color: #eab308; }
+.char-count.over { color: #ef4444; }
+
+/* Options grid */
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.option-card {
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    font-size: 0.92rem;
+    font-weight: 500;
+    background: var(--card);
+    user-select: none;
+}
+.option-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.option-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+.option-card input { display: none; }
+
+/* Checkbox grid */
+.check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.check-card {
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    font-weight: 500;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.check-card:hover { border-color: var(--primary); }
+.check-card .check-box {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 12px;
+    color: white;
+}
+.check-card.checked { border-color: var(--primary); background: var(--primary-light); }
+.check-card.checked .check-box { background: var(--primary); border-color: var(--primary); }
+.check-card input { display: none; }
+
+/* Buttons */
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 20px;
+}
+.btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font);
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    flex: 1;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.4); }
+.btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+.btn-secondary {
+    background: var(--border);
+    color: var(--text);
+    min-width: 100px;
+}
+.btn-secondary:hover { background: #cbd5e1; }
+.btn-secondary.hidden { visibility: hidden; }
+
+/* Two-col transform */
+.transform-group { display: flex; gap: 12px; align-items: center; }
+.transform-group .form-group { flex: 1; margin-bottom: 0; }
+.transform-arrow { font-size: 1.3rem; color: var(--primary); font-weight: 700; }
+
+/* Processing */
+.processing {
+    text-align: center;
+    padding: 60px 0;
+}
+.spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.processing h3 { margin-bottom: 8px; }
+.processing p { color: var(--text-secondary); }
+
+/* Result */
+.result-area {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+}
+.copy-btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--primary);
+    color: white;
+    transition: all 0.2s;
+    font-family: var(--font);
+}
+.copy-btn:hover { background: var(--primary-dark); }
+.copy-btn.copied { background: var(--success); }
+.upsell-box {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--primary-light), #f5f3ff);
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    text-align: center;
+}
+.upsell-box p { font-weight: 600; margin-bottom: 8px; }
+.upsell-box small { color: var(--text-secondary); }
+
+/* Conditional field */
+.conditional-field { margin-top: -8px; margin-bottom: 16px; }
+.conditional-field.hidden { display: none; }
+
+/* Responsive */
+@media (max-width: 540px) {
+    .steps-container { padding: 24px 20px; }
+    .step { padding: 24px 20px; }
+    .options-grid { grid-template-columns: 1fr; }
+    .check-grid { grid-template-columns: 1fr; }
+    .transform-group { flex-direction: column; }
+    .transform-arrow { transform: rotate(90deg); }
+    .container { min-height: 480px; }
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="steps-container" id="stepsContainer"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+    {
+        id: 'objective',
+        title: 'Qual seu principal objetivo nos próximos 3 meses?',
+        subtitle: 'Isso vai ajudar a direcionar o prompt para o que realmente importa agora.',
+        type: 'select',
+        key: 'objective',
+        options: [
+            { value: 'vendas', label: 'Aumentar vendas / faturamento' },
+            { value: 'lancamento', label: 'Lançar novo produto / serviço' },
+            { value: 'autoridade', label: 'Posicionar autoridade / marca' },
+            { value: 'processos', label: 'Otimizar processos internos' },
+            { value: 'leads', label: 'Atrair mais leads' },
+            { value: 'fidelizar', label: 'Fidelizar clientes' },
+        ]
+    },
+    {
+        id: 'segment',
+        title: 'Qual seu segmento / ramo?',
+        subtitle: 'Selecione a área principal do seu negócio.',
+        type: 'select',
+        key: 'segment',
+        options: [
+            { value: 'saude', label: 'Saúde' },
+            { value: 'marketing', label: 'Marketing / Digital' },
+            { value: 'educacao', label: 'Educação' },
+            { value: 'consultoria', label: 'Consultoria' },
+            { value: 'tecnologia', label: 'Tecnologia' },
+            { value: 'servicos', label: 'Serviços' },
+            { value: 'varejo', label: 'Varejo' },
+            { value: 'imobiliario', label: 'Imobiliário' },
+            { value: 'financeiro', label: 'Financeiro' },
+            { value: 'outro', label: 'Outro' },
+        ],
+        hasOther: true,
+        otherKey: 'segmentOther',
+        otherLabel: 'Qual?'
+    },
+    {
+        id: 'role',
+        title: 'Qual cargo você ocupa?',
+        subtitle: 'Entender seu papel ajuda a calibrar o nível estratégico do prompt.',
+        type: 'select',
+        key: 'role',
+        options: [
+            { value: 'ceo', label: 'CEO / Sócio' },
+            { value: 'gestor', label: 'Gestor' },
+            { value: 'analista', label: 'Analista' },
+            { value: 'freelancer', label: 'Freelancer' },
+            { value: 'liberal', label: 'Profissional Liberal' },
+        ]
+    },
+    {
+        id: 'audience',
+        title: 'Qual o perfil do seu cliente ideal?',
+        subtitle: 'Marque todos que se aplicam.',
+        type: 'checkbox',
+        key: 'audience',
+        options: [
+            { value: 'Empresários', label: 'Empresários' },
+            { value: 'Profissionais liberais', label: 'Profissionais liberais' },
+            { value: 'Pequenos empreendedores', label: 'Pequenos empreendedores' },
+            { value: 'Executivos', label: 'Executivos' },
+            { value: 'Jovens (18-30)', label: 'Jovens (18-30)' },
+            { value: 'Adultos (30-50)', label: 'Adultos (30-50)' },
+            { value: 'Senior (50+)', label: 'Senior (50+)' },
+        ]
+    },
+    {
+        id: 'product',
+        title: 'Qual seu principal produto ou serviço?',
+        subtitle: 'Descreva em poucas palavras o que você vende ou entrega.',
+        type: 'text',
+        key: 'product',
+        placeholder: 'Ex: Consultoria de marketing digital, curso de Python, clínica odontológica...'
+    },
+    {
+        id: 'problem',
+        title: 'Qual o PRINCIPAL problema que você resolve?',
+        subtitle: 'Qual dor seus clientes têm antes de te contratar?',
+        type: 'textarea',
+        key: 'problem',
+        placeholder: 'Ex: Meus clientes não conseguem gerar leads qualificados...',
+        maxlength: 280
+    },
+    {
+        id: 'transformation',
+        title: 'Qual a transformação que você entrega?',
+        subtitle: 'Complete a frase abaixo.',
+        type: 'transform',
+        keyFrom: 'transformationFrom',
+        keyTo: 'transformationTo',
+        fromPlaceholder: 'Meu cliente sai de...',
+        toPlaceholder: '...e chega em'
+    },
+    {
+        id: 'tone',
+        title: 'Qual o tom de voz da sua marca?',
+        subtitle: 'Como sua marca fala com o cliente?',
+        type: 'select',
+        key: 'tone',
+        options: [
+            { value: 'formal', label: 'Profissional / Formal' },
+            { value: 'didatico', label: 'Didático / Pedagógico' },
+            { value: 'humoristico', label: 'Descontraído / Humorístico' },
+            { value: 'inspirador', label: 'Inspirador / Motivacional' },
+            { value: 'direto', label: 'Direto / Objetivo' },
+            { value: 'luxo', label: 'Luxo / Sofisticado' },
+        ]
+    },
+    {
+        id: 'differentiator',
+        title: 'O que te diferencia da concorrência?',
+        subtitle: 'Qual seu principal diferencial competitivo?',
+        type: 'textarea',
+        key: 'differentiator',
+        placeholder: 'Ex: Atendimento humanizado + metodologia exclusiva em 3 etapas...',
+        maxlength: 280
+    },
+    {
+        id: 'purpose',
+        title: 'Para qual finalidade você vai usar o ChatGPT?',
+        subtitle: 'Qual uso será mais frequente?',
+        type: 'select',
+        key: 'purpose',
+        options: [
+            { value: 'conteudo', label: 'Criação de conteúdo (redes / blog)' },
+            { value: 'suporte', label: 'Suporte / vendas' },
+            { value: 'estrategia', label: 'Estratégia / planejamento' },
+            { value: 'materiais', label: 'Produzir materiais (ebook, email, roteiro)' },
+            { value: 'automacao', label: 'Automação de processos' },
+            { value: 'analise', label: 'Análise de dados' },
+        ]
+    }
+];
+
+const TONE_RULES = {
+    'formal': 'Mantenha um tom profissional e formal. Evite gírias, contrações e abreviações. Seja preciso e técnico quando necessário.',
+    'didatico': 'Explique conceitos de forma simples e didática. Use analogias, exemplos práticos e linguagem acessível.',
+    'humoristico': 'Use linguagem descontraída e bem-humorada. Pode usar gírias e tom informal. Seja leve e divertido.',
+    'inspirador': 'Use linguagem inspiradora e motivacional. Reforce o potencial, a transformação e o poder de ação.',
+    'direto': 'Seja direto e objetivo. Vá direto ao ponto sem rodeios. Use frases curtas e impacto.',
+    'luxo': 'Use linguagem sofisticada e elegante. Reforce exclusividade, refinement e qualidade premium.'
+};
+
+const PURPOSE_LABELS = {
+    'conteudo': 'criação de conteúdo para redes sociais e blog',
+    'suporte': 'suporte ao cliente e processos de vendas',
+    'estrategia': 'estratégia e planejamento de negócios',
+    'materiais': 'produção de materiais como ebooks, emails e roteiros',
+    'automacao': 'automação de processos operacionais',
+    'analise': 'análise de dados e geração de insights'
+};
+
+const OBJECTIVE_LABELS = {
+    'vendas': 'Aumentar vendas e faturamento',
+    'lancamento': 'Lançar novo produto ou serviço',
+    'autoridade': 'Posicionar autoridade e marca',
+    'processos': 'Otimizar processos internos',
+    'leads': 'Atrair mais leads qualificados',
+    'fidelizar': 'Fidelizar clientes existentes'
+};
+
+const SEGMENT_LABELS = {
+    'saude': 'Saúde', 'marketing': 'Marketing Digital', 'educacao': 'Educação',
+    'consultoria': 'Consultoria', 'tecnologia': 'Tecnologia', 'servicos': 'Prestação de Serviços',
+    'varejo': 'Varejo', 'imobiliario': 'Mercado Imobiliário', 'financeiro': 'Mercado Financeiro'
+};
+
+// ---- State ----
+let stepIndex = -1;
+const data = {
+    name: '', email: '', businessName: '',
+    objective: '', segment: '', segmentOther: '', role: '',
+    audience: [], audienceOther: '', product: '', problem: '',
+    transformationFrom: '', transformationTo: '',
+    tone: '', differentiator: '', purpose: ''
+};
+
+// ---- DOM refs ----
+const container = document.getElementById('stepsContainer');
+const progressBar = document.getElementById('progressBar');
+
+// ---- Render ----
+function render() {
+    container.innerHTML = '';
+    const steps = getSteps();
+    steps.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'step' + (i === stepIndex ? ' active' : '');
+        div.dataset.index = i;
+        div.innerHTML = s;
+        container.appendChild(div);
+    });
+    updateProgress();
+}
+
+function getSteps() {
+    // Step 0 = Welcome, 1..N = questions, N+1 = processing, N+2 = result
+    const qCount = QUESTIONS.length;
+    const totalQ = qCount;
+    let steps = [];
+
+    // Welcome
+    steps.push(renderWelcome());
+
+    // Questions
+    QUESTIONS.forEach((q, i) => {
+        steps.push(renderQuestion(q, i + 1, totalQ));
+    });
+
+    // Processing
+    steps.push(renderProcessing());
+
+    // Result
+    steps.push(renderResult());
+
+    return steps;
+}
+
+function renderWelcome() {
+    return `
+        <div class="welcome-icon">🔍</div>
+        <div class="welcome-title">Raio-X do Seu Negócio</div>
+        <div class="welcome-sub">
+            Responda 10 perguntas rápidas e receba um <strong>Prompt Mestre Lite</strong>
+            personalizado para usar no ChatGPT — feito sob medida para o seu negócio.
+        </div>
+        <div class="form-group">
+            <label>Seu nome</label>
+            <input type="text" id="inputName" value="${escHtml(data.name)}" placeholder="Digite seu nome" autocomplete="name">
+        </div>
+        <div class="form-group">
+            <label>Seu e-mail</label>
+            <input type="email" id="inputEmail" value="${escHtml(data.email)}" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label>Nome do seu negócio</label>
+            <input type="text" id="inputBusiness" value="${escHtml(data.businessName)}" placeholder="Ex: Agência Alpha, Clínica Viver Bem...">
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="goToWelcome()">Começar →</button>
+        </div>
+    `;
+}
+
+function renderQuestion(q, num, total) {
+    let body = '';
+    const label = q.hasOther && data[q.key] === 'outro'
+        ? `<div class="conditional-field" id="cond_${q.id}">
+             <div class="form-group">
+               <input type="text" value="${escHtml(data[q.otherKey] || '')}" placeholder="${q.otherLabel || 'Qual?'}"
+                      oninput="onOtherInput('${q.id}','${q.otherKey}',this.value)">
+             </div>
+           </div>`
+        : '';
+
+    if (q.type === 'select') {
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="options-grid" id="grid_${q.id}">
+                ${q.options.map(o => `
+                    <div class="option-card${data[q.key] === o.value ? ' selected' : ''}"
+                         onclick="selectOption('${q.key}','${o.value}','${q.id}')">
+                        <input type="radio" name="${q.id}" value="${o.value}" ${data[q.key] === o.value ? 'checked' : ''}>
+                        ${o.label}
+                    </div>
+                `).join('')}
+            </div>
+            ${label}
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${(!data[q.key] || (q.hasOther && data[q.key] === 'outro' && !data[q.otherKey])) ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
+    } else if (q.type === 'checkbox') {
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="check-grid" id="grid_${q.id}">
+                ${q.options.map(o => {
+                    const checked = (data[q.key] || []).includes(o.value);
+                    return `
+                        <div class="check-card${checked ? ' checked' : ''}" data-value="${escHtml(o.value)}"
+                             onclick="toggleCheck('${q.key}','${o.value}','${q.id}')">
+                            <div class="check-box">${checked ? '✓' : ''}</div>
+                            ${o.label}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <div class="conditional-field ${(!data[q.key] || data[q.key].length === 0) ? 'hidden' : ''}" id="cond_${q.id}">
+                <div class="form-group">
+                    <input type="text" placeholder="Outro público? Especifique..." value="${escHtml(data.audienceOther || '')}" oninput="data.audienceOther=this.value">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${(!data[q.key] || data[q.key].length === 0) ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
+    } else if (q.type === 'text') {
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="form-group">
+                <input type="text" value="${escHtml(data[q.key] || '')}" placeholder="${q.placeholder || ''}"
+                       oninput="data['${q.key}']=this.value; updateBtn('${q.id}', this.value)">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${!data[q.key] ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
+    } else if (q.type === 'textarea') {
+        const val = data[q.key] || '';
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="form-group">
+                <textarea placeholder="${q.placeholder || ''}" maxlength="${q.maxlength || ''}"
+                    oninput="data['${q.key}']=this.value; updateCharCount('${q.id}',this); updateBtn('${q.id}',this.value)"
+                    id="ta_${q.id}">${escHtml(val)}</textarea>
+                <div class="char-count" id="cc_${q.id}">${q.maxlength ? (val.length + '/' + q.maxlength) : ''}</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${!val ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
+    } else if (q.type === 'transform') {
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="transform-group">
+                <div class="form-group">
+                    <input type="text" value="${escHtml(data[q.keyFrom] || '')}" placeholder="${q.fromPlaceholder || ''}"
+                           oninput="data['${q.keyFrom}']=this.value; updateTransformBtn()">
+                </div>
+                <div class="transform-arrow">→</div>
+                <div class="form-group">
+                    <input type="text" value="${escHtml(data[q.keyTo] || '')}" placeholder="${q.toPlaceholder || ''}"
+                           oninput="data['${q.keyTo}']=this.value; updateTransformBtn()">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${!data[q.keyFrom] || !data[q.keyTo] ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
+    }
+    return body;
+}
+
+function renderProcessing() {
+    return `
+        <div class="processing">
+            <div class="spinner"></div>
+            <h3>Gerando seu Prompt Mestre Lite...</h3>
+            <p>Analisando suas respostas e personalizando o resultado</p>
+        </div>
+    `;
+}
+
+function renderResult() {
+    const prompt = generatePrompt();
+    return `
+        <div class="step-count" style="color:var(--success)">✓ Diagnóstico concluído</div>
+        <div class="step-title" style="margin-bottom:4px">🎯 Seu Prompt Mestre Lite</div>
+        <div class="step-subtitle" style="margin-bottom:16px">Copie e cole no ChatGPT para começar.</div>
+        <div class="result-area" id="resultPrompt">${escHtml(prompt)}</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">📋 Copiar Prompt</button>
+        <div class="upsell-box">
+            <p>🚀 Quer o Prompt Mestre COMPLETO?</p>
+            <small>Com persona aprofundada + gatilhos mentais + SWOT + matriz de conteúdo.</small>
+            <br><br>
+            <button class="btn btn-primary" onclick="alert('Versão completa em breve! Deixe seu e-mail para avisarmos.')">Quero a versão completa →</button>
+        </div>
+        <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-secondary" onclick="resetAll()">← Refazer diagnóstico</button>
+        </div>
+    `;
+}
+
+// ---- Navigation ----
+function goToWelcome() {
+    const name = document.getElementById('inputName')?.value.trim();
+    const email = document.getElementById('inputEmail')?.value.trim();
+    const business = document.getElementById('inputBusiness')?.value.trim();
+    if (!name || !email || !business) {
+        alert('Preencha todos os campos para começar.');
+        return;
+    }
+    if (!email.includes('@')) {
+        alert('Digite um e-mail válido.');
+        return;
+    }
+    data.name = name;
+    data.email = email;
+    data.businessName = business;
+    stepIndex = 1;
+    render();
+}
+
+function nextStep() {
+    const q = QUESTIONS[stepIndex - 1];
+    if (q) {
+        if (q.type === 'select' && !data[q.key]) return;
+        if (q.type === 'select' && q.hasOther && data[q.key] === 'outro' && !data[q.otherKey]) return;
+        if (q.type === 'checkbox' && (!data[q.key] || data[q.key].length === 0)) return;
+        if (q.type === 'text' && !data[q.key]) return;
+        if (q.type === 'textarea' && !data[q.key]) return;
+        if (q.type === 'transform' && (!data[q.keyFrom] || !data[q.keyTo])) return;
+    }
+    if (stepIndex < QUESTIONS.length) {
+        stepIndex++;
+        render();
+    } else {
+        // All questions done -> processing
+        stepIndex = QUESTIONS.length + 1; // processing step
+        render();
+        setTimeout(() => {
+            stepIndex = QUESTIONS.length + 2; // result step
+            render();
+        }, 1200);
+    }
+}
+
+function prevStep() {
+    if (stepIndex > 1) {
+        stepIndex--;
+        render();
+    }
+}
+
+function updateProgress() {
+    const total = QUESTIONS.length;
+    let pct = 0;
+    if (stepIndex === 0) pct = 0;
+    else if (stepIndex <= total) pct = (stepIndex / total) * 100;
+    else pct = 100;
+    progressBar.style.width = pct + '%';
+}
+
+// ---- Actions ----
+function selectOption(key, value, qid) {
+    data[key] = value;
+    const grid = document.getElementById('grid_' + qid);
+    if (grid) {
+        grid.querySelectorAll('.option-card').forEach(el => {
+            const input = el.querySelector('input');
+            el.classList.toggle('selected', input.value === value);
+            if (input.value === value) input.checked = true;
+        });
+    }
+    const cond = document.getElementById('cond_' + qid);
+    if (cond) {
+        cond.style.display = (value === 'outro') ? 'block' : 'none';
+        if (value !== 'outro') { data[key + 'Other'] = ''; }
+    }
+    const btn = document.getElementById('btn_' + qid);
+    if (btn) {
+        if (value === 'outro') {
+            btn.disabled = !data[key + 'Other'];
+        } else {
+            btn.disabled = false;
+        }
+    }
+}
+
+function toggleCheck(key, value, qid) {
+    if (!data[key]) data[key] = [];
+    const idx = data[key].indexOf(value);
+    if (idx === -1) data[key].push(value);
+    else data[key].splice(idx, 1);
+    const grid = document.getElementById('grid_' + qid);
+    if (grid) {
+        grid.querySelectorAll('.check-card').forEach(el => {
+            const val = el.dataset.value || '';
+            const checked = (data[key] || []).includes(val);
+            el.classList.toggle('checked', checked);
+            const box = el.querySelector('.check-box');
+            if (box) box.textContent = checked ? '✓' : '';
+        });
+    }
+    // Show conditional if any checked
+    const cond = document.getElementById('cond_' + qid);
+    if (cond) {
+        cond.classList.toggle('hidden', !data[key] || data[key].length === 0);
+    }
+    const btn = document.getElementById('btn_' + qid);
+    if (btn) btn.disabled = !data[key] || data[key].length === 0;
+}
+
+function updateBtn(qid, val) {
+    const btn = document.getElementById('btn_' + qid);
+    if (btn) btn.disabled = !val;
+}
+
+function updateTransformBtn() {
+    const btn = document.getElementById('btn_transformation');
+    if (btn) btn.disabled = !data.transformationFrom || !data.transformationTo;
+}
+
+function updateCharCount(qid, el) {
+    const cc = document.getElementById('cc_' + qid);
+    if (cc) {
+        const len = el.value.length;
+        const max = el.maxLength;
+        cc.textContent = len + '/' + max;
+        cc.className = 'char-count' + (len > max * 0.9 ? ' warning' : '') + (len >= max ? ' over' : '');
+    }
+}
+
+function onOtherInput(qid, otherKey, value) {
+    data[otherKey] = value;
+    const btn = document.getElementById('btn_' + qid);
+    if (btn) btn.disabled = !value.trim();
+}
+
+// ---- Prompt Generation ----
+function generatePrompt() {
+    const seg = SEGMENT_LABELS[data.segment] || data.segmentOther || data.segment;
+    const purp = PURPOSE_LABELS[data.purpose] || data.purpose;
+    const toneLbl = data.tone ? QUESTIONS.find(q => q.key === 'tone')?.options?.find(o => o.value === data.tone)?.label || data.tone : '';
+    const toneRule = TONE_RULES[data.tone] || '';
+    const objLbl = OBJECTIVE_LABELS[data.objective] || data.objective;
+    const audienceStr = [...(data.audience || [])].join(', ');
+    const audienceFull = audienceStr + (data.audienceOther ? ', ' + data.audienceOther : '');
+
+    return `🧠 PROMPT MESTRE LITE — ${data.businessName.toUpperCase()}
+
+PERSONA
+Você é um especialista em ${seg}, com domínio do mercado e das dores do público. Atue como um estrategista sênior para ${data.businessName}.
+
+TOM DE VOZ
+${toneLbl} — ${toneRule}
+
+PÚBLICO-ALVO
+${audienceFull || 'Clientes ideais do negócio'}
+
+PROBLEMA CENTRAL
+${data.problem}
+
+TRANSFORMAÇÃO
+De: ${data.transformationFrom}
+Para: ${data.transformationTo}
+
+DIFERENCIAL COMPETITIVO
+${data.differentiator}
+
+OBJETIVO ATUAL
+${objLbl}
+
+USO PRINCIPAL
+${purp}
+
+REGRAS DE OURO
+1. Use linguagem ${(data.tone ? toneLbl.toLowerCase() : 'apropriada')} em toda interação.
+2. Fale diretamente com ${audienceFull || 'o cliente ideal'} — na mesma altura, com empatia e sem jargões desnecessários.
+3. Toda solução deve atacar o problema central: ${data.problem}.
+4. Reforce constantemente a transformação: de ${data.transformationFrom} para ${data.transformationTo}.
+5. Incorpore o diferencial competitivo: ${data.differentiator}.
+6. ${toneRule}
+
+FINALIDADE PRINCIPAL
+Este prompt será usado para ${purp} de ${data.businessName}. Todas as respostas devem estar alinhadas a este propósito e entregar valor real em cada interação.`;
+}
+
+// ---- Utility ----
+function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyPrompt() {
+    const el = document.getElementById('resultPrompt');
+    const btn = document.getElementById('copyBtn');
+    if (!el || !btn) return;
+    navigator.clipboard.writeText(el.textContent).then(() => {
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = '📋 Copiar Prompt';
+            btn.classList.remove('copied');
+        }, 2000);
+    }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = el.textContent;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = '📋 Copiar Prompt';
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+
+function resetAll() {
+    Object.keys(data).forEach(k => {
+        if (Array.isArray(data[k])) data[k] = [];
+        else data[k] = '';
+    });
+    stepIndex = 0;
+    render();
+}
+
+// ---- Init ----
+stepIndex = 0;
+render();
+</script>
+</body>
+</html>
