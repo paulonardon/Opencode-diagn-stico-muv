@@ -486,8 +486,13 @@ const SEGMENT_LABELS = {
     'varejo': 'Varejo', 'imobiliario': 'Mercado Imobiliário', 'financeiro': 'Mercado Financeiro'
 };
 
+// Cole aqui a URL do Web App do Google Apps Script para salvar os diagnósticos.
+// Ex: https://script.google.com/macros/s/SEU_ID_DO_DEPLOY/exec
+const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz2-PgVVgIsdulnFhNdp9jyR6HI60uQvtDR99Z4KwlmA2_7XenIXxYLAxBSCfApaBVPBA/exec';
+
 // ---- State ----
 let stepIndex = -1;
+let diagnosisSaved = false;
 const data = {
     name: '', email: '', businessName: '',
     objective: '', segment: '', segmentOther: '', role: '',
@@ -540,7 +545,7 @@ function getSteps() {
 function renderWelcome() {
     return `
         <div class="welcome-icon">🔍</div>
-        <div class="welcome-title">Raio-X do Seu Negócio</div>
+        <div class="welcome-title">Raio-X do Seu Negócio:</div>
         <div class="welcome-sub">
             Responda 10 perguntas rápidas e receba um <strong>Prompt Mestre Lite</strong>
             personalizado para usar no ChatGPT — feito sob medida para o seu negócio.
@@ -747,6 +752,7 @@ function nextStep() {
         setTimeout(() => {
             stepIndex = QUESTIONS.length + 2; // result step
             render();
+            saveDiagnosis();
         }, 1200);
     }
 }
@@ -892,6 +898,53 @@ FINALIDADE PRINCIPAL
 Este prompt será usado para ${purp} de ${data.businessName}. Todas as respostas devem estar alinhadas a este propósito e entregar valor real em cada interação.`;
 }
 
+// ---- Google Sheets Integration ----
+function buildDiagnosisPayload() {
+    const segment = data.segment === 'outro'
+        ? data.segmentOther
+        : (SEGMENT_LABELS[data.segment] || getOptionLabel('segment', data.segment));
+
+    return {
+        submittedAt: new Date().toISOString(),
+        name: data.name,
+        email: data.email,
+        businessName: data.businessName,
+        objective: getOptionLabel('objective', data.objective),
+        segment,
+        role: getOptionLabel('role', data.role),
+        audience: [...(data.audience || []), data.audienceOther].filter(Boolean).join(', '),
+        product: data.product,
+        problem: data.problem,
+        transformationFrom: data.transformationFrom,
+        transformationTo: data.transformationTo,
+        tone: getOptionLabel('tone', data.tone),
+        differentiator: data.differentiator,
+        purpose: getOptionLabel('purpose', data.purpose),
+        prompt: generatePrompt()
+    };
+}
+
+function getOptionLabel(key, value) {
+    if (!value) return '';
+    const question = QUESTIONS.find(q => q.key === key);
+    return question?.options?.find(o => o.value === value)?.label || value;
+}
+
+function saveDiagnosis() {
+    if (diagnosisSaved || !SHEETS_WEBHOOK_URL) return;
+
+    diagnosisSaved = true;
+    fetch(SHEETS_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(buildDiagnosisPayload())
+    }).catch(error => {
+        diagnosisSaved = false;
+        console.error('Erro ao salvar diagnóstico:', error);
+    });
+}
+
 // ---- Utility ----
 function escHtml(str) {
     if (!str) return '';
@@ -931,6 +984,7 @@ function resetAll() {
         if (Array.isArray(data[k])) data[k] = [];
         else data[k] = '';
     });
+    diagnosisSaved = false;
     stepIndex = 0;
     render();
 }
