@@ -379,6 +379,27 @@ const QUESTIONS = [
         otherLabel: 'Qual segmento?'
     },
     {
+        id: 'website',
+        title: 'Seu negócio tem site?',
+        subtitle: 'Se tiver, cole o link para o Don Move conhecer melhor seu negócio.',
+        type: 'optionalText',
+        key: 'websiteUrl',
+        noneKey: 'noWebsite',
+        noneLabel: 'Não tenho site',
+        placeholder: 'Ex: https://www.seunegocio.com.br'
+    },
+    {
+        id: 'socialLinks',
+        title: 'Seu negócio tem redes sociais?',
+        subtitle: 'Cole os links principais, como Instagram, LinkedIn, YouTube ou TikTok.',
+        type: 'optionalTextarea',
+        key: 'socialLinks',
+        noneKey: 'noSocialLinks',
+        noneLabel: 'Não tenho redes sociais',
+        placeholder: 'Ex: https://instagram.com/seunegocio\nhttps://linkedin.com/company/seunegocio',
+        maxlength: 400
+    },
+    {
         id: 'offer',
         title: 'O que você vende?',
         subtitle: 'Descreva sua principal oferta em uma frase.',
@@ -546,6 +567,10 @@ const data = {
     objective: '',
     segment: '',
     segmentOther: '',
+    websiteUrl: '',
+    noWebsite: false,
+    socialLinks: '',
+    noSocialLinks: false,
     offer: '',
     ticket: '',
     salesModel: '',
@@ -713,6 +738,35 @@ function renderQuestion(q, num, total) {
                 <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${!val ? 'disabled' : ''}>Continuar →</button>
             </div>
         `;
+    } else if (q.type === 'optionalText' || q.type === 'optionalTextarea') {
+        const val = data[q.key] || '';
+        const none = !!data[q.noneKey];
+        const field = q.type === 'optionalTextarea'
+            ? `<textarea placeholder="${q.placeholder || ''}" maxlength="${q.maxlength || ''}" ${none ? 'disabled' : ''}
+                    oninput="data['${q.key}']=this.value; data['${q.noneKey}']=false; updateCharCount('${q.id}',this); updateOptionalBtn('${q.id}','${q.key}','${q.noneKey}')"
+                    id="ta_${q.id}">${escHtml(val)}</textarea>
+               <div class="char-count" id="cc_${q.id}">${q.maxlength ? (val.length + '/' + q.maxlength) : ''}</div>`
+            : `<input type="text" value="${escHtml(val)}" placeholder="${q.placeholder || ''}" ${none ? 'disabled' : ''}
+                    oninput="data['${q.key}']=this.value; data['${q.noneKey}']=false; updateOptionalBtn('${q.id}','${q.key}','${q.noneKey}')">`;
+
+        body = `
+            <div class="step-count">Pergunta ${num} de ${total}</div>
+            <div class="step-title">${q.title}</div>
+            <div class="step-subtitle">${q.subtitle || ''}</div>
+            <div class="form-group">
+                ${field}
+            </div>
+            <div class="check-grid">
+                <div class="check-card${none ? ' checked' : ''}" id="none_${q.id}" onclick="toggleOptionalNone('${q.key}','${q.noneKey}','${q.id}')">
+                    <div class="check-box">${none ? '✓' : ''}</div>
+                    ${q.noneLabel || 'Não tenho'}
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary${num === 1 ? ' hidden' : ''}" onclick="prevStep()">← Voltar</button>
+                <button class="btn btn-primary" id="btn_${q.id}" onclick="nextStep()" ${(!val && !none) ? 'disabled' : ''}>Continuar →</button>
+            </div>
+        `;
     } else if (q.type === 'transform') {
         body = `
             <div class="step-count">Pergunta ${num} de ${total}</div>
@@ -796,6 +850,7 @@ function nextStep() {
         if (q.type === 'checkbox' && (!data[q.key] || data[q.key].length === 0)) return;
         if (q.type === 'text' && !data[q.key]) return;
         if (q.type === 'textarea' && !data[q.key]) return;
+        if ((q.type === 'optionalText' || q.type === 'optionalTextarea') && !data[q.key] && !data[q.noneKey]) return;
         if (q.type === 'transform' && (!data[q.keyFrom] || !data[q.keyTo])) return;
     }
     if (stepIndex < QUESTIONS.length) {
@@ -884,6 +939,23 @@ function updateBtn(qid, val) {
     if (btn) btn.disabled = !val;
 }
 
+function updateOptionalBtn(qid, key, noneKey) {
+    const btn = document.getElementById('btn_' + qid);
+    const noneCard = document.getElementById('none_' + qid);
+    if (btn) btn.disabled = !data[key] && !data[noneKey];
+    if (noneCard) {
+        noneCard.classList.toggle('checked', !!data[noneKey]);
+        const box = noneCard.querySelector('.check-box');
+        if (box) box.textContent = data[noneKey] ? '✓' : '';
+    }
+}
+
+function toggleOptionalNone(key, noneKey, qid) {
+    data[noneKey] = !data[noneKey];
+    if (data[noneKey]) data[key] = '';
+    render();
+}
+
 function updateTransformBtn() {
     const btn = document.getElementById('btn_transformation');
     if (btn) btn.disabled = !data.transformationFrom || !data.transformationTo;
@@ -911,6 +983,8 @@ function generatePrompt() {
     const objLbl = OBJECTIVE_LABELS[data.objective] || data.objective;
     const ticket = TICKET_LABELS[data.ticket] || data.ticket;
     const salesModel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
+    const website = data.noWebsite ? 'Aluno informou que não tem site.' : (data.websiteUrl || 'Não informado.');
+    const socialLinks = data.noSocialLinks ? 'Aluno informou que não tem redes sociais.' : (data.socialLinks || 'Não informado.');
 
     const toneLbl = data.tone
         ? QUESTIONS.find(q => q.key === 'tone')?.options?.find(o => o.value === data.tone)?.label || data.tone
@@ -941,6 +1015,18 @@ ${seg}
 
 Objetivo principal nos próximos 3 meses:
 ${objLbl}
+
+---
+
+LINKS DO NEGÓCIO
+
+Site:
+${website}
+
+Redes sociais:
+${socialLinks}
+
+Quando houver links informados, use-os para acessar mais contexto sobre posicionamento, comunicação, oferta, provas, linguagem e presença digital do negócio do aluno.
 
 ---
 
@@ -1046,6 +1132,8 @@ function buildDiagnosisPayload() {
     const objective = OBJECTIVE_LABELS[data.objective] || data.objective;
     const ticket = TICKET_LABELS[data.ticket] || data.ticket;
     const salesModel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
+    const websiteUrl = data.noWebsite ? 'Não tem site' : data.websiteUrl;
+    const socialLinks = data.noSocialLinks ? 'Não tem redes sociais' : data.socialLinks;
 
     return {
         submittedAt: new Date().toISOString(),
@@ -1054,6 +1142,8 @@ function buildDiagnosisPayload() {
         businessName: data.businessName,
         objective,
         segment,
+        websiteUrl,
+        socialLinks,
         offer: data.offer,
         ticket,
         salesModel,

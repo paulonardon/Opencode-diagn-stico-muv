@@ -7,6 +7,8 @@ const COLUMNS = [
   { header: 'Nome do negócio', key: 'businessName' },
   { header: 'Objetivo', key: 'objective' },
   { header: 'Segmento', key: 'segment' },
+  { header: 'Site', key: 'websiteUrl' },
+  { header: 'Redes sociais', key: 'socialLinks' },
   { header: 'Oferta', key: 'offer' },
   { header: 'Ticket médio', key: 'ticket' },
   { header: 'Como vende', key: 'salesModel' },
