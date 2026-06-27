@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promt Base do Negócio → Prompt Mestre Lite</title>
+<title>Promt Base do Negócio</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -343,22 +343,22 @@ const QUESTIONS = [
     {
         id: 'objective',
         title: 'Qual seu principal objetivo nos próximos 3 meses?',
-        subtitle: 'Isso vai ajudar a direcionar o prompt para o que realmente importa agora.',
+        subtitle: 'Escolha o objetivo mais importante agora.',
         type: 'select',
         key: 'objective',
         options: [
             { value: 'vendas', label: 'Aumentar vendas / faturamento' },
-            { value: 'lancamento', label: 'Lançar novo produto / serviço' },
-            { value: 'autoridade', label: 'Posicionar autoridade / marca' },
-            { value: 'processos', label: 'Otimizar processos internos' },
-            { value: 'leads', label: 'Atrair mais leads' },
-            { value: 'fidelizar', label: 'Fidelizar clientes' },
+            { value: 'leads_melhores', label: 'Atrair leads melhores' },
+            { value: 'reduzir_curiosos', label: 'Reduzir curiosos no WhatsApp' },
+            { value: 'melhorar_conversao', label: 'Melhorar conversão em reuniões ou vendas' },
+            { value: 'organizar_atendimento', label: 'Organizar atendimento comercial' },
+            { value: 'aumentar_ticket', label: 'Vender ofertas de maior valor' }
         ]
     },
     {
         id: 'segment',
-        title: 'Qual seu segmento / ramo?',
-        subtitle: 'Selecione a área principal do seu negócio.',
+        title: 'Qual seu segmento?',
+        subtitle: 'Escolha a área principal do seu negócio.',
         type: 'select',
         key: 'segment',
         options: [
@@ -367,67 +367,88 @@ const QUESTIONS = [
             { value: 'educacao', label: 'Educação' },
             { value: 'consultoria', label: 'Consultoria' },
             { value: 'tecnologia', label: 'Tecnologia' },
-            { value: 'servicos', label: 'Serviços' },
+            { value: 'servicos', label: 'Prestação de Serviços' },
             { value: 'varejo', label: 'Varejo' },
             { value: 'imobiliario', label: 'Imobiliário' },
             { value: 'financeiro', label: 'Financeiro' },
-            { value: 'outro', label: 'Outro' },
+            { value: 'industria', label: 'Indústria / B2B técnico' },
+            { value: 'outro', label: 'Outro' }
         ],
         hasOther: true,
         otherKey: 'segmentOther',
-        otherLabel: 'Qual?'
+        otherLabel: 'Qual segmento?'
     },
     {
-        id: 'role',
-        title: 'Qual cargo você ocupa?',
-        subtitle: 'Entender seu papel ajuda a calibrar o nível estratégico do prompt.',
+        id: 'offer',
+        title: 'O que você vende?',
+        subtitle: 'Descreva sua principal oferta em uma frase.',
+        type: 'textarea',
+        key: 'offer',
+        placeholder: 'Ex: Consultoria para clínicas aumentarem agendamentos qualificados pelo WhatsApp.',
+        maxlength: 300
+    },
+    {
+        id: 'ticket',
+        title: 'Qual é o ticket médio dessa oferta?',
+        subtitle: 'Pode ser um valor aproximado.',
         type: 'select',
-        key: 'role',
+        key: 'ticket',
         options: [
-            { value: 'ceo', label: 'CEO / Sócio' },
-            { value: 'gestor', label: 'Gestor' },
-            { value: 'analista', label: 'Analista' },
-            { value: 'freelancer', label: 'Freelancer' },
-            { value: 'liberal', label: 'Profissional Liberal' },
+            { value: 'ate_500', label: 'Até R$500' },
+            { value: '500_2000', label: 'R$500 a R$2.000' },
+            { value: '2000_5000', label: 'R$2.000 a R$5.000' },
+            { value: '5000_10000', label: 'R$5.000 a R$10.000' },
+            { value: '10000_50000', label: 'R$10.000 a R$50.000' },
+            { value: 'acima_50000', label: 'Acima de R$50.000' }
         ]
     },
     {
-        id: 'audience',
-        title: 'Qual o perfil do seu cliente ideal?',
-        subtitle: 'Marque todos que se aplicam.',
-        type: 'checkbox',
-        key: 'audience',
+        id: 'salesModel',
+        title: 'Como a venda acontece hoje?',
+        subtitle: 'Escolha o principal caminho até a venda.',
+        type: 'select',
+        key: 'salesModel',
         options: [
-            { value: 'Empresários', label: 'Empresários' },
-            { value: 'Profissionais liberais', label: 'Profissionais liberais' },
-            { value: 'Pequenos empreendedores', label: 'Pequenos empreendedores' },
-            { value: 'Executivos', label: 'Executivos' },
-            { value: 'Jovens (18-30)', label: 'Jovens (18-30)' },
-            { value: 'Adultos (30-50)', label: 'Adultos (30-50)' },
-            { value: 'Senior (50+)', label: 'Senior (50+)' },
+            { value: 'whatsapp', label: 'WhatsApp' },
+            { value: 'reuniao', label: 'Reunião / call' },
+            { value: 'diagnostico', label: 'Diagnóstico consultivo' },
+            { value: 'ligacao', label: 'Ligação' },
+            { value: 'proposta', label: 'Proposta comercial' },
+            { value: 'checkout', label: 'Checkout direto' },
+            { value: 'presencial', label: 'Atendimento presencial' }
         ]
     },
     {
-        id: 'product',
-        title: 'Qual seu principal produto ou serviço?',
-        subtitle: 'Descreva em poucas palavras o que você vende ou entrega.',
-        type: 'text',
-        key: 'product',
-        placeholder: 'Ex: Consultoria de marketing digital, curso de Python, clínica odontológica...'
+        id: 'idealBuyer',
+        title: 'Quem é seu melhor cliente?',
+        subtitle: 'Descreva quem tem mais chance de comprar e ter resultado.',
+        type: 'textarea',
+        key: 'idealBuyer',
+        placeholder: 'Ex: Donos de clínicas que já recebem leads, mas perdem tempo com pessoas sem perfil.',
+        maxlength: 400
+    },
+    {
+        id: 'badLead',
+        title: 'Que tipo de lead mais faz você perder tempo?',
+        subtitle: 'Descreva o curioso ou lead ruim que você quer filtrar.',
+        type: 'textarea',
+        key: 'badLead',
+        placeholder: 'Ex: Pessoas que só perguntam preço, querem desconto, somem ou não têm urgência.',
+        maxlength: 400
     },
     {
         id: 'problem',
-        title: 'Qual o PRINCIPAL problema que você resolve?',
-        subtitle: 'Qual dor seus clientes têm antes de te contratar?',
+        title: 'Qual problema principal sua oferta resolve?',
+        subtitle: 'Fale da dor real do cliente antes de comprar.',
         type: 'textarea',
         key: 'problem',
-        placeholder: 'Ex: Meus clientes não conseguem gerar leads qualificados...',
-        maxlength: 280
+        placeholder: 'Ex: O cliente recebe contatos pelo WhatsApp, mas não sabe separar interessados reais de curiosos.',
+        maxlength: 400
     },
     {
         id: 'transformation',
-        title: 'Qual a transformação que você entrega?',
-        subtitle: 'Complete a frase abaixo.',
+        title: 'Qual transformação você entrega?',
+        subtitle: 'Complete a mudança principal.',
         type: 'transform',
         keyFrom: 'transformationFrom',
         keyTo: 'transformationTo',
@@ -435,77 +456,88 @@ const QUESTIONS = [
         toPlaceholder: '...e chega em'
     },
     {
+        id: 'differentiator',
+        title: 'Qual é seu principal diferencial?',
+        subtitle: 'Explique por que alguém deveria escolher você.',
+        type: 'textarea',
+        key: 'differentiator',
+        placeholder: 'Ex: Atendimento próximo, método próprio, experiência no nicho, suporte rápido, implementação guiada.',
+        maxlength: 300
+    },
+    {
+        id: 'objections',
+        title: 'O que normalmente trava a compra?',
+        subtitle: 'Liste as dúvidas ou objeções mais comuns.',
+        type: 'textarea',
+        key: 'objections',
+        placeholder: 'Ex: Está caro, preciso pensar, já tentei antes, não tenho tempo, não sei se funciona para mim.',
+        maxlength: 400
+    },
+    {
         id: 'tone',
-        title: 'Qual o tom de voz da sua marca?',
-        subtitle: 'Como sua marca fala com o cliente?',
+        title: 'Qual tom de voz sua marca deve usar?',
+        subtitle: 'Como a comunicação deve soar?',
         type: 'select',
         key: 'tone',
         options: [
             { value: 'formal', label: 'Profissional / Formal' },
-            { value: 'didatico', label: 'Didático / Pedagógico' },
-            { value: 'humoristico', label: 'Descontraído / Humorístico' },
-            { value: 'inspirador', label: 'Inspirador / Motivacional' },
+            { value: 'consultivo', label: 'Consultivo / Estratégico' },
             { value: 'direto', label: 'Direto / Objetivo' },
-            { value: 'luxo', label: 'Luxo / Sofisticado' },
-        ]
-    },
-    {
-        id: 'differentiator',
-        title: 'O que te diferencia da concorrência?',
-        subtitle: 'Qual seu principal diferencial competitivo?',
-        type: 'textarea',
-        key: 'differentiator',
-        placeholder: 'Ex: Atendimento humanizado + metodologia exclusiva em 3 etapas...',
-        maxlength: 280
-    },
-    {
-        id: 'purpose',
-        title: 'Para qual finalidade você vai usar o ChatGPT?',
-        subtitle: 'Qual uso será mais frequente?',
-        type: 'select',
-        key: 'purpose',
-        options: [
-            { value: 'conteudo', label: 'Criação de conteúdo (redes / blog)' },
-            { value: 'suporte', label: 'Suporte / vendas' },
-            { value: 'estrategia', label: 'Estratégia / planejamento' },
-            { value: 'materiais', label: 'Produzir materiais (ebook, email, roteiro)' },
-            { value: 'automacao', label: 'Automação de processos' },
-            { value: 'analise', label: 'Análise de dados' },
+            { value: 'didatico', label: 'Didático / Simples' },
+            { value: 'premium', label: 'Premium / Sofisticado' },
+            { value: 'proximo', label: 'Próximo / Humano' }
         ]
     }
 ];
 
-const TONE_RULES = {
-    'formal': 'Mantenha um tom profissional e formal. Evite gírias, contrações e abreviações. Seja preciso e técnico quando necessário.',
-    'didatico': 'Explique conceitos de forma simples e didática. Use analogias, exemplos práticos e linguagem acessível.',
-    'humoristico': 'Use linguagem descontraída e bem-humorada. Pode usar gírias e tom informal. Seja leve e divertido.',
-    'inspirador': 'Use linguagem inspiradora e motivacional. Reforce o potencial, a transformação e o poder de ação.',
-    'direto': 'Seja direto e objetivo. Vá direto ao ponto sem rodeios. Use frases curtas e impacto.',
-    'luxo': 'Use linguagem sofisticada e elegante. Reforce exclusividade, refinement e qualidade premium.'
-};
-
-const PURPOSE_LABELS = {
-    'conteudo': 'criação de conteúdo para redes sociais e blog',
-    'suporte': 'suporte ao cliente e processos de vendas',
-    'estrategia': 'estratégia e planejamento de negócios',
-    'materiais': 'produção de materiais como ebooks, emails e roteiros',
-    'automacao': 'automação de processos operacionais',
-    'analise': 'análise de dados e geração de insights'
-};
-
 const OBJECTIVE_LABELS = {
     'vendas': 'Aumentar vendas e faturamento',
-    'lancamento': 'Lançar novo produto ou serviço',
-    'autoridade': 'Posicionar autoridade e marca',
-    'processos': 'Otimizar processos internos',
-    'leads': 'Atrair mais leads qualificados',
-    'fidelizar': 'Fidelizar clientes existentes'
+    'leads_melhores': 'Atrair leads melhores',
+    'reduzir_curiosos': 'Reduzir curiosos no WhatsApp',
+    'melhorar_conversao': 'Melhorar conversão em reuniões ou vendas',
+    'organizar_atendimento': 'Organizar atendimento comercial',
+    'aumentar_ticket': 'Vender ofertas de maior valor'
 };
 
 const SEGMENT_LABELS = {
-    'saude': 'Saúde', 'marketing': 'Marketing Digital', 'educacao': 'Educação',
-    'consultoria': 'Consultoria', 'tecnologia': 'Tecnologia', 'servicos': 'Prestação de Serviços',
-    'varejo': 'Varejo', 'imobiliario': 'Mercado Imobiliário', 'financeiro': 'Mercado Financeiro'
+    'saude': 'Saúde',
+    'marketing': 'Marketing / Digital',
+    'educacao': 'Educação',
+    'consultoria': 'Consultoria',
+    'tecnologia': 'Tecnologia',
+    'servicos': 'Prestação de Serviços',
+    'varejo': 'Varejo',
+    'imobiliario': 'Imobiliário',
+    'financeiro': 'Financeiro',
+    'industria': 'Indústria / B2B técnico'
+};
+
+const TICKET_LABELS = {
+    'ate_500': 'Até R$500',
+    '500_2000': 'R$500 a R$2.000',
+    '2000_5000': 'R$2.000 a R$5.000',
+    '5000_10000': 'R$5.000 a R$10.000',
+    '10000_50000': 'R$10.000 a R$50.000',
+    'acima_50000': 'Acima de R$50.000'
+};
+
+const SALES_MODEL_LABELS = {
+    'whatsapp': 'WhatsApp',
+    'reuniao': 'Reunião / call',
+    'diagnostico': 'Diagnóstico consultivo',
+    'ligacao': 'Ligação',
+    'proposta': 'Proposta comercial',
+    'checkout': 'Checkout direto',
+    'presencial': 'Atendimento presencial'
+};
+
+const TONE_RULES = {
+    'formal': 'Use linguagem profissional, clara e sem informalidade excessiva.',
+    'consultivo': 'Use linguagem estratégica, consultiva e orientada a diagnóstico.',
+    'direto': 'Use linguagem objetiva, com frases claras e foco em ação.',
+    'didatico': 'Explique com simplicidade, exemplos práticos e sem jargões desnecessários.',
+    'premium': 'Use linguagem sofisticada, segura e com posicionamento de valor.',
+    'proximo': 'Use linguagem humana, próxima e acessível, sem perder profissionalismo.'
 };
 
 // Cole aqui a URL do Web App do Google Apps Script para salvar os diagnósticos.
@@ -516,11 +548,24 @@ const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz2-PgVVgIsd
 let stepIndex = -1;
 let diagnosisSaved = false;
 const data = {
-    name: '', email: '', businessName: '',
-    objective: '', segment: '', segmentOther: '', role: '',
-    audience: [], audienceOther: '', product: '', problem: '',
-    transformationFrom: '', transformationTo: '',
-    tone: '', differentiator: '', purpose: ''
+    name: '',
+    email: '',
+    businessName: '',
+
+    objective: '',
+    segment: '',
+    segmentOther: '',
+    offer: '',
+    ticket: '',
+    salesModel: '',
+    idealBuyer: '',
+    badLead: '',
+    problem: '',
+    transformationFrom: '',
+    transformationTo: '',
+    differentiator: '',
+    objections: '',
+    tone: ''
 };
 
 // ---- DOM refs ----
@@ -569,7 +614,7 @@ function renderWelcome() {
         <div class="welcome-icon">MUV</div>
         <div class="welcome-title">Promt Base do Negócio:</div>
         <div class="welcome-sub">
-            Responda a 10 perguntas rápidas e receba um <strong>Prompt Mestre Lite</strong> personalizado, pronto para usar com o agente Don Muv no ChatGPT e feito sob medida para o seu negócio.
+            Responda a algumas perguntas rápidas e receba um <strong>Promt Base do Negócio</strong> pronto para usar com o agente Don Move. Ele vai ajudar o agente a entender sua oferta, seu público, seu comprador ideal e o tipo de lead que precisa ser filtrado.
         </div>
         <div class="form-group">
             <label>Seu nome</label>
@@ -639,7 +684,7 @@ function renderQuestion(q, num, total) {
             </div>
             <div class="conditional-field ${(!data[q.key] || data[q.key].length === 0) ? 'hidden' : ''}" id="cond_${q.id}">
                 <div class="form-group">
-                    <input type="text" placeholder="Outro público? Especifique..." value="${escHtml(data.audienceOther || '')}" oninput="data.audienceOther=this.value">
+                    <input type="text" placeholder="Outro? Especifique..." value="${escHtml(data[q.key + 'Other'] || '')}" oninput="data['${q.key}Other']=this.value">
                 </div>
             </div>
             <div class="btn-group">
@@ -707,7 +752,7 @@ function renderProcessing() {
     return `
         <div class="processing">
             <div class="spinner"></div>
-            <h3>Gerando seu Prompt Mestre Lite...</h3>
+            <h3>Gerando seu Promt Base do Negócio...</h3>
             <p>Analisando suas respostas e personalizando o resultado</p>
         </div>
     `;
@@ -716,16 +761,16 @@ function renderProcessing() {
 function renderResult() {
     const prompt = generatePrompt();
     return `
-        <div class="step-count" style="color:var(--success)">✓ mapeamento concluído</div>
-        <div class="step-title" style="margin-bottom:4px">🎯 Seu Prompt Mestre Lite</div>
-        <div class="step-subtitle" style="margin-bottom:16px">Copie e cole no ChatGPT para começar.</div>
+        <div class="step-count" style="color:var(--success)">✓ promt base concluído</div>
+        <div class="step-title" style="margin-bottom:4px">🎯 Seu Promt Base do Negócio</div>
+        <div class="step-subtitle" style="margin-bottom:16px">Copie este promt e envie ao agente Don Move junto com seu Raio-X Anti-Curiosos.</div>
         <div class="result-area" id="resultPrompt">${escHtml(prompt)}</div>
-        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">📋 Copiar Prompt</button>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">📋 Copiar Promt</button>
         <div class="upsell-box">
-            <p>🚀 Quer o Prompt Mestre COMPLETO?</p>
-            <small>Com persona aprofundada + gatilhos mentais + SWOT + matriz de conteúdo.</small>
+            <p>🚀 Próximo passo: Raio-X Anti-Curiosos</p>
+            <small>Depois de copiar este promt, envie também o diagnóstico do seu funil para o Don Move cruzar contexto + vazamento.</small>
             <br><br>
-            <button class="btn btn-primary" onclick="alert('Versão completa em breve! Deixe seu e-mail para avisarmos.')">Quero a versão completa →</button>
+            <button class="btn btn-primary" onclick="alert('Em seguida, envie seu Raio-X Anti-Curiosos para o agente Don Move.')">Continuar para o Raio-X →</button>
         </div>
         <div class="btn-group" style="margin-top:12px">
             <button class="btn btn-secondary" onclick="resetAll()">← Refazer diagnóstico</button>
@@ -873,50 +918,143 @@ function onOtherInput(qid, otherKey, value) {
 // ---- Prompt Generation ----
 function generatePrompt() {
     const seg = SEGMENT_LABELS[data.segment] || data.segmentOther || data.segment;
-    const purp = PURPOSE_LABELS[data.purpose] || data.purpose;
-    const toneLbl = data.tone ? QUESTIONS.find(q => q.key === 'tone')?.options?.find(o => o.value === data.tone)?.label || data.tone : '';
-    const toneRule = TONE_RULES[data.tone] || '';
     const objLbl = OBJECTIVE_LABELS[data.objective] || data.objective;
-    const audienceStr = [...(data.audience || [])].join(', ');
-    const audienceFull = audienceStr + (data.audienceOther ? ', ' + data.audienceOther : '');
+    const ticket = TICKET_LABELS[data.ticket] || data.ticket;
+    const salesModel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
 
-    return `🧠 PROMPT MESTRE LITE — ${data.businessName.toUpperCase()}
+    const toneLbl = data.tone
+        ? QUESTIONS.find(q => q.key === 'tone')?.options?.find(o => o.value === data.tone)?.label || data.tone
+        : '';
 
-PERSONA
-Você é um especialista em ${seg}, com domínio do mercado e das dores do público. Atue como um estrategista sênior para ${data.businessName}.
+    const toneRule = TONE_RULES[data.tone] || '';
 
-TOM DE VOZ
-${toneLbl} — ${toneRule}
+    return `🧠 PROMT BASE DO NEGÓCIO — ${data.businessName.toUpperCase()}
 
-PÚBLICO-ALVO
-${audienceFull || 'Clientes ideais do negócio'}
+Este documento é o contexto base do negócio do aluno.
 
-PROBLEMA CENTRAL
-${data.problem}
+Use este contexto para ajudar o agente Don Move a entender o negócio, a oferta, o público, o comprador ideal e o tipo de lead que precisa ser filtrado.
 
-TRANSFORMAÇÃO
-De: ${data.transformationFrom}
-Para: ${data.transformationTo}
+Este promt deve ser usado junto com o Raio-X Anti-Curiosos.
 
-DIFERENCIAL COMPETITIVO
-${data.differentiator}
+---
 
-OBJETIVO ATUAL
+DADOS DO ALUNO
+
+Nome do aluno:
+${data.name}
+
+Nome do negócio:
+${data.businessName}
+
+Segmento:
+${seg}
+
+Objetivo principal nos próximos 3 meses:
 ${objLbl}
 
-USO PRINCIPAL
-${purp}
+---
 
-REGRAS DE OURO
-1. Use linguagem ${(data.tone ? toneLbl.toLowerCase() : 'apropriada')} em toda interação.
-2. Fale diretamente com ${audienceFull || 'o cliente ideal'} — na mesma altura, com empatia e sem jargões desnecessários.
-3. Toda solução deve atacar o problema central: ${data.problem}.
-4. Reforce constantemente a transformação: de ${data.transformationFrom} para ${data.transformationTo}.
-5. Incorpore o diferencial competitivo: ${data.differentiator}.
-6. ${toneRule}
+OFERTA PRINCIPAL
 
-FINALIDADE PRINCIPAL
-Este prompt será usado para ${purp} de ${data.businessName}. Todas as respostas devem estar alinhadas a este propósito e entregar valor real em cada interação.`;
+O que o negócio vende:
+${data.offer}
+
+Ticket médio:
+${ticket}
+
+Como a venda acontece hoje:
+${salesModel}
+
+---
+
+COMPRADOR IDEAL
+
+Quem é o melhor cliente para este negócio:
+${data.idealBuyer}
+
+Esse é o perfil que deve ser priorizado nas próximas recomendações, anúncios, triagens e mensagens comerciais.
+
+---
+
+CURIOSO / LEAD RUIM
+
+Tipo de lead que mais faz o negócio perder tempo:
+${data.badLead}
+
+Esse é o perfil que deve ser filtrado antes de ocupar WhatsApp, reunião, vendedor ou atendimento.
+
+---
+
+PROBLEMA CENTRAL
+
+Principal problema que a oferta resolve:
+${data.problem}
+
+---
+
+TRANSFORMAÇÃO
+
+Antes da solução, o cliente está assim:
+${data.transformationFrom}
+
+Depois da solução, o cliente deve chegar aqui:
+${data.transformationTo}
+
+Transformação resumida:
+Ajudar o comprador ideal a sair de "${data.transformationFrom}" e chegar em "${data.transformationTo}" por meio da oferta principal do negócio.
+
+---
+
+DIFERENCIAL COMPETITIVO
+
+Principal diferencial:
+${data.differentiator}
+
+Esse diferencial deve ser usado para reforçar valor, confiança e posicionamento nas mensagens comerciais.
+
+---
+
+OBJEÇÕES E TRAVAS
+
+O que normalmente trava a compra:
+${data.objections}
+
+Essas objeções devem ser consideradas na criação de perguntas de triagem, anúncios-filtro, scripts de WhatsApp e follow-ups.
+
+---
+
+TOM DE VOZ
+
+Tom de voz da marca:
+${toneLbl}
+
+Regra de linguagem:
+${toneRule}
+
+---
+
+COMO O DON MOVE DEVE USAR ESTE CONTEXTO
+
+Ao receber este Promt Base do Negócio, o Don Move deve:
+
+1. Entender o negócio antes de recomendar qualquer ação.
+2. Cruzar este contexto com o Raio-X Anti-Curiosos.
+3. Identificar se o problema principal está em oferta, público, mensagem, triagem ou condução comercial.
+4. Ajudar o aluno a separar comprador real de curioso.
+5. Criar perguntas de qualificação simples.
+6. Criar mensagens-filtro e anúncios mais específicos.
+7. Melhorar scripts de WhatsApp e follow-up.
+8. Respeitar o tom de voz definido.
+9. Não recomendar mais tráfego antes de corrigir filtro, mensagem e triagem.
+10. Entregar respostas práticas, diretas e aplicáveis.
+
+---
+
+REGRA PRINCIPAL
+
+O objetivo não é atrair qualquer lead.
+
+O objetivo é ajudar o aluno a atrair, identificar e conduzir compradores reais, filtrando curiosos antes que eles consumam tempo, verba e energia comercial.`;
 }
 
 // ---- Google Sheets Integration ----
@@ -930,17 +1068,19 @@ function buildDiagnosisPayload() {
         name: data.name,
         email: data.email,
         businessName: data.businessName,
-        objective: getOptionLabel('objective', data.objective),
+        objective: OBJECTIVE_LABELS[data.objective] || data.objective,
         segment,
-        role: getOptionLabel('role', data.role),
-        audience: [...(data.audience || []), data.audienceOther].filter(Boolean).join(', '),
-        product: data.product,
+        offer: data.offer,
+        ticket: TICKET_LABELS[data.ticket] || data.ticket,
+        salesModel: SALES_MODEL_LABELS[data.salesModel] || data.salesModel,
+        idealBuyer: data.idealBuyer,
+        badLead: data.badLead,
         problem: data.problem,
         transformationFrom: data.transformationFrom,
         transformationTo: data.transformationTo,
-        tone: getOptionLabel('tone', data.tone),
         differentiator: data.differentiator,
-        purpose: getOptionLabel('purpose', data.purpose),
+        objections: data.objections,
+        tone: getOptionLabel('tone', data.tone),
         prompt: generatePrompt()
     };
 }
@@ -980,7 +1120,7 @@ function copyPrompt() {
         btn.textContent = '✓ Copiado!';
         btn.classList.add('copied');
         setTimeout(() => {
-            btn.textContent = '📋 Copiar Prompt';
+            btn.textContent = '📋 Copiar Promt';
             btn.classList.remove('copied');
         }, 2000);
     }).catch(() => {
@@ -994,7 +1134,7 @@ function copyPrompt() {
         btn.textContent = '✓ Copiado!';
         btn.classList.add('copied');
         setTimeout(() => {
-            btn.textContent = '📋 Copiar Prompt';
+            btn.textContent = '📋 Copiar Promt';
             btn.classList.remove('copied');
         }, 2000);
     });
