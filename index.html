@@ -428,15 +428,6 @@ const QUESTIONS = [
         maxlength: 400
     },
     {
-        id: 'badLead',
-        title: 'Que tipo de lead mais faz você perder tempo?',
-        subtitle: 'Descreva o curioso ou lead ruim que você quer filtrar.',
-        type: 'textarea',
-        key: 'badLead',
-        placeholder: 'Ex: Pessoas que só perguntam preço, querem desconto, somem ou não têm urgência.',
-        maxlength: 400
-    },
-    {
         id: 'problem',
         title: 'Qual problema principal sua oferta resolve?',
         subtitle: 'Fale da dor real do cliente antes de comprar.',
@@ -559,7 +550,6 @@ const data = {
     ticket: '',
     salesModel: '',
     idealBuyer: '',
-    badLead: '',
     problem: '',
     transformationFrom: '',
     transformationTo: '',
@@ -636,13 +626,13 @@ function renderWelcome() {
 
 function renderQuestion(q, num, total) {
     let body = '';
-    const label = q.hasOther && data[q.key] === 'outro'
-        ? `<div class="conditional-field" id="cond_${q.id}">
-             <div class="form-group">
-               <input type="text" value="${escHtml(data[q.otherKey] || '')}" placeholder="${q.otherLabel || 'Qual?'}"
-                      oninput="onOtherInput('${q.id}','${q.otherKey}',this.value)">
-             </div>
-           </div>`
+    const label = q.hasOther
+        ? `<div class="conditional-field${data[q.key] === 'outro' ? '' : ' hidden'}" id="cond_${q.id}">
+              <div class="form-group">
+                <input type="text" value="${escHtml(data[q.otherKey] || '')}" placeholder="${q.otherLabel || 'Qual?'}"
+                       oninput="onOtherInput('${q.id}','${q.otherKey}',this.value)">
+              </div>
+            </div>`
         : '';
 
     if (q.type === 'select') {
@@ -932,7 +922,7 @@ function generatePrompt() {
 
 Este documento é o contexto base do negócio do aluno.
 
-Use este contexto para ajudar o agente Don Move a entender o negócio, a oferta, o público, o comprador ideal e o tipo de lead que precisa ser filtrado.
+Use este contexto para ajudar o agente Don Move a entender o negócio, a oferta, o público, o comprador ideal e o objetivo comercial do aluno.
 
 Este promt deve ser usado junto com o Raio-X Anti-Curiosos.
 
@@ -973,15 +963,6 @@ Quem é o melhor cliente para este negócio:
 ${data.idealBuyer}
 
 Esse é o perfil que deve ser priorizado nas próximas recomendações, anúncios, triagens e mensagens comerciais.
-
----
-
-CURIOSO / LEAD RUIM
-
-Tipo de lead que mais faz o negócio perder tempo:
-${data.badLead}
-
-Esse é o perfil que deve ser filtrado antes de ocupar WhatsApp, reunião, vendedor ou atendimento.
 
 ---
 
@@ -1074,7 +1055,6 @@ function buildDiagnosisPayload() {
         ticket: TICKET_LABELS[data.ticket] || data.ticket,
         salesModel: SALES_MODEL_LABELS[data.salesModel] || data.salesModel,
         idealBuyer: data.idealBuyer,
-        badLead: data.badLead,
         problem: data.problem,
         transformationFrom: data.transformationFrom,
         transformationTo: data.transformationTo,
