@@ -7,16 +7,17 @@ const COLUMNS = [
   { header: 'Nome do negócio', key: 'businessName' },
   { header: 'Objetivo', key: 'objective' },
   { header: 'Segmento', key: 'segment' },
-  { header: 'Cargo', key: 'role' },
-  { header: 'Público-alvo', key: 'audience' },
-  { header: 'Produto/serviço', key: 'product' },
+  { header: 'Oferta', key: 'offer' },
+  { header: 'Ticket médio', key: 'ticket' },
+  { header: 'Como vende', key: 'salesModel' },
+  { header: 'Comprador ideal', key: 'idealBuyer' },
   { header: 'Problema central', key: 'problem' },
   { header: 'Transformação - de', key: 'transformationFrom' },
   { header: 'Transformação - para', key: 'transformationTo' },
-  { header: 'Tom de voz', key: 'tone' },
   { header: 'Diferencial', key: 'differentiator' },
-  { header: 'Finalidade', key: 'purpose' },
-  { header: 'Prompt gerado', key: 'prompt' }
+  { header: 'Objeções', key: 'objections' },
+  { header: 'Tom de voz', key: 'tone' },
+  { header: 'Promt gerado', key: 'prompt' }
 ];
 
 function doPost(e) {

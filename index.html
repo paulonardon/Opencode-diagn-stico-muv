@@ -1043,17 +1043,20 @@ function buildDiagnosisPayload() {
     const segment = data.segment === 'outro'
         ? data.segmentOther
         : (SEGMENT_LABELS[data.segment] || getOptionLabel('segment', data.segment));
+    const objective = OBJECTIVE_LABELS[data.objective] || data.objective;
+    const ticket = TICKET_LABELS[data.ticket] || data.ticket;
+    const salesModel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
 
     return {
         submittedAt: new Date().toISOString(),
         name: data.name,
         email: data.email,
         businessName: data.businessName,
-        objective: OBJECTIVE_LABELS[data.objective] || data.objective,
+        objective,
         segment,
         offer: data.offer,
-        ticket: TICKET_LABELS[data.ticket] || data.ticket,
-        salesModel: SALES_MODEL_LABELS[data.salesModel] || data.salesModel,
+        ticket,
+        salesModel,
         idealBuyer: data.idealBuyer,
         problem: data.problem,
         transformationFrom: data.transformationFrom,
@@ -1061,6 +1064,9 @@ function buildDiagnosisPayload() {
         differentiator: data.differentiator,
         objections: data.objections,
         tone: getOptionLabel('tone', data.tone),
+        audience: data.idealBuyer,
+        product: data.offer,
+        purpose: `${objective} | ${salesModel} | ${ticket}`,
         prompt: generatePrompt()
     };
 }
