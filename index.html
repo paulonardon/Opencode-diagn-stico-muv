@@ -1126,12 +1126,13 @@ O objetivo é ajudar o aluno a atrair, identificar e conduzir compradores reais,
 
 // ---- Google Sheets Integration ----
 function buildDiagnosisPayload() {
-    const segment = data.segment === 'outro'
+    const segmentLabel = data.segment === 'outro'
         ? data.segmentOther
         : (SEGMENT_LABELS[data.segment] || getOptionLabel('segment', data.segment));
-    const objective = OBJECTIVE_LABELS[data.objective] || data.objective;
-    const ticket = TICKET_LABELS[data.ticket] || data.ticket;
-    const salesModel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
+    const objectiveLabel = OBJECTIVE_LABELS[data.objective] || data.objective;
+    const ticketLabel = TICKET_LABELS[data.ticket] || data.ticket;
+    const salesModelLabel = SALES_MODEL_LABELS[data.salesModel] || data.salesModel;
+    const toneLabel = getOptionLabel('tone', data.tone);
     const websiteUrl = data.noWebsite ? 'Não tem site' : data.websiteUrl;
     const socialLinks = data.noSocialLinks ? 'Não tem redes sociais' : data.socialLinks;
 
@@ -1140,23 +1141,36 @@ function buildDiagnosisPayload() {
         name: data.name,
         email: data.email,
         businessName: data.businessName,
-        objective,
-        segment,
+        objectiveLabel,
+        objectiveValue: data.objective,
+        segmentLabel,
+        segmentValue: data.segment,
+        segmentOther: data.segmentOther,
         websiteUrl,
+        noWebsite: data.noWebsite ? 'Sim' : 'Não',
         socialLinks,
+        noSocialLinks: data.noSocialLinks ? 'Sim' : 'Não',
         offer: data.offer,
-        ticket,
-        salesModel,
+        ticketLabel,
+        ticketValue: data.ticket,
+        salesModelLabel,
+        salesModelValue: data.salesModel,
         idealBuyer: data.idealBuyer,
         problem: data.problem,
         transformationFrom: data.transformationFrom,
         transformationTo: data.transformationTo,
         differentiator: data.differentiator,
         objections: data.objections,
-        tone: getOptionLabel('tone', data.tone),
+        toneLabel,
+        toneValue: data.tone,
+        objective: objectiveLabel,
+        segment: segmentLabel,
+        ticket: ticketLabel,
+        salesModel: salesModelLabel,
+        tone: toneLabel,
         audience: data.idealBuyer,
         product: data.offer,
-        purpose: `${objective} | ${salesModel} | ${ticket}`,
+        purpose: `${objectiveLabel} | ${salesModelLabel} | ${ticketLabel}`,
         prompt: generatePrompt()
     };
 }
